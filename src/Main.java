@@ -1,7 +1,7 @@
 /**
  * Clase ejecutable para probar la lógica de Estudiante.
  * 
- * @author TU NOMBRE Y CÉDULA
+ * @author Eric Fabián De León Batista 8-1041-2262 / Gilberto Jones 8-802-346
  */
 public class Main {
 
@@ -11,7 +11,6 @@ public class Main {
         // Arreglo de notas de prueba (una nota es inválida a propósito: 150.0)
         double[] misNotas = {85.0, 150.0, 90.0};
 
-        // TODO 6: Instancia un objeto 'Estudiante' pasándole tu nombre y el arreglo 'misNotas'
         Estudiante est = new Estudiante("Carlos Pérez", misNotas);
 
         // Resultados en pantalla
