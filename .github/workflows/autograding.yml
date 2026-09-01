@@ -1,0 +1,70 @@
+name: Evaluacion Automatica - Lab Expres Java
+
+on: [push]
+
+jobs:
+  evaluacion-autograding:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar codigo del repositorio
+        uses: actions/checkout@v3
+
+      - name: 2. Configurar Java JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 3. Configurar Python para evaluacion
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: 4. Compilar y Validar Resultados Esperados
+        run: |
+          python -c '
+          import os, sys, subprocess, re
+
+          print("🔍 Iniciando verificacion automatica del laboratorio...")
+
+          # Check 1: Existencia de archivos
+          if not os.path.exists("src/Estudiante.java") or not os.path.exists("src/Main.java"):
+              print("❌ EVALUACIÓN FALLIDA: No se encontraron los archivos src/Estudiante.java o src/Main.java.")
+              sys.exit(1)
+
+          # Check 2: Compilación de Java
+          compilacion = subprocess.run(["javac", "src/Estudiante.java", "src/Main.java"], capture_output=True, text=True)
+          if compilacion.returncode != 0:
+              print("❌ ERROR DE COMPILACIÓN EN JAVA:")
+              print(compilacion.stderr)
+              sys.exit(1)
+
+          print("✅ Compilacion exitosa.")
+
+          # Check 3: Ejecución de Main
+          ejecucion = subprocess.run(["java", "-cp", "src", "Main"], capture_output=True, text=True)
+          salida = ejecucion.stdout
+
+          print("\n--- SALIDA GENERADA POR EL ESTUDIANTE ---")
+          print(salida)
+          print("-------------------------------------------\n")
+
+          # Check 4: Validar salida esperada (Promedio 58.33 y estado REPROBADO)
+          errores = []
+
+          if "58.33" not in salida and "58,33" not in salida:
+              errores.append("El promedio calculado no es correcto. Debe ser 58.33 (la nota 150.0 debio convertirse a 0.0).")
+
+          if "REPROBADO" not in salida.upper():
+              errores.append("El estado del estudiante debe indicar REPROBADO (58.33 es menor a 71.0).")
+
+          if errores:
+              print("❌ EVALUACIÓN FALLIDA EN LÓGICA DE NEGOCIO:")
+              for err in errores:
+                  print(f"   - {err}")
+              sys.exit(1)
+
+          print("🎉 ¡FELICITACIONES! Tu laboratorio paso todas las pruebas de autocalificacion.")
+          sys.exit(0)
+          '
